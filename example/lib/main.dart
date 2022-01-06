@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:nts_picker/nts_picker.dart';
+import 'package:nts_picker_example/views/image_picker.dart';
 import 'package:nts_picker_example/views/multi_picker.dart';
 import 'package:nts_picker_example/views/single_picker.dart';
 
@@ -22,7 +23,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-    _controller = TabController(length: 2, vsync: this);
+    _controller = TabController(length: 3, vsync: this);
     super.initState();
   }
 
@@ -33,8 +34,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
         appBar: AppBar(
           title: const Text('NTS Picker'),
           bottom: TabBar(controller: _controller, tabs: const [
-            Tab(text: 'Single Picker'),
-            Tab(text: 'Multi Picker'),
+            Tab(text: 'Single Stream'),
+            Tab(text: 'Multi Stream'),
+            Tab(text: 'Picker'),
           ]),
         ),
         body: TabBarView(
@@ -42,6 +44,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
           children: const [
             SinglePicker(),
             MultiPicker(),
+            ImagePicker(),
           ],
         ),
       ),

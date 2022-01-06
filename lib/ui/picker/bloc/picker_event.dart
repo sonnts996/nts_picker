@@ -4,26 +4,30 @@ class PickerEvent {
   const PickerEvent();
 }
 
-class LoadFilesEvent extends PickerEvent {
-  const LoadFilesEvent(this.selector);
+class LoadDataEvent extends PickerEvent {
+  const LoadDataEvent(this.selector);
 
   final Selector selector;
 }
 
 class RequestPermissionEvent extends PickerEvent {
-  const RequestPermissionEvent(this.permission);
-
-  final Permission permission;
+  const RequestPermissionEvent();
 }
 
 class SelectEvent extends PickerEvent {
-  const SelectEvent(this.path);
+  const SelectEvent(this.file);
 
-  final String path;
+  final MediaFile file;
 }
 
-class FolderFilterEvent extends PickerEvent{
+class OnDataEvent extends PickerEvent {
+  const OnDataEvent(this.data);
+
+  final List<MediaFile> data;
+}
+
+class FolderFilterEvent extends PickerEvent {
   const FolderFilterEvent(this.folder);
 
-  final FolderItem folder;
+  final Folder? folder;
 }

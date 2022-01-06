@@ -1,3 +1,8 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+original
+
+## 0.0.4
+
+upgrade package dependencies to latest version
+

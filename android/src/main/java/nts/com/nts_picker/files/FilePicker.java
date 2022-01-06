@@ -59,7 +59,7 @@ public class FilePicker {
         int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         while (cursor.moveToNext()) {
             String absolutePath = cursor.getString(column_index_data);
-            listTemp.add(absolutePath);
+            listTemp.add(new MediaFile( absolutePath, type).toString());
         }
         return listTemp;
     }

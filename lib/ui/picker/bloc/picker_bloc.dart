@@ -1,23 +1,25 @@
-import 'package:path/path.dart' as path;
+import 'dart:async';
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nts_picker/data/model/file/folder_item.dart';
+import 'package:nts_picker/data/model/file/folder_item.model.dart';
+import 'package:nts_picker/data/model/file/media_file.model.dart';
 import 'package:nts_picker/data/model/file/selector.model.dart';
 import 'package:nts_picker/domain/file/file_repository.dart';
-import 'package:nts_picker/domain/file/usecase/load_file.usecase.dart';
+import 'package:nts_picker/domain/file/usecase/load_data.usecase.dart';
+import 'package:nts_picker/domain/file/usecase/select_file.usecase.dart';
+import 'package:nts_picker/manager/data_manager.dart';
+import 'package:nts_picker/manager/picker_controller.dart';
 import 'package:nts_picker/manager/request_permission.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 part 'picker_bloc.g.dart';
-
 part 'picker_event.dart';
-
 part 'picker_state.dart';
 
 class PickerBloc extends Bloc<PickerEvent, PickerState> {
   PickerBloc(
     this._fileRepository,
+    this._controller,
     Selector selector,
     bool multiChoose,
   ) : super(PickerState(
@@ -25,67 +27,80 @@ class PickerBloc extends Bloc<PickerEvent, PickerState> {
           list: [],
           multiChoose: multiChoose,
         )) {
-    on<LoadFilesEvent>(loadFileEvent);
-    on<RequestPermissionEvent>(requestPermission);
-    on<SelectEvent>(selectFile);
-    on<FolderFilterEvent>(onFolderFilter);
+    on<OnDataEvent>(onDataEvent);
+    on<LoadDataEvent>(loadFileEvent);
+    on<RequestPermissionEvent>(requestPermissionEvent);
+    on<SelectEvent>(selectFileEvent);
+    on<FolderFilterEvent>(onFolderFilterEvent);
 
-    add(LoadFilesEvent(selector));
+    _currentFolderStream = _controller.currentFolderStream.listen((event) {
+      add(FolderFilterEvent(event));
+    });
+
+    _mediaFileStream = _dataManager.mediaFileStream.listen((event) {
+      if (_controller.currentFolder == Folder.all()) {
+        add(OnDataEvent(event));
+      } else {
+        add(FolderFilterEvent(_controller.currentFolder));
+      }
+    });
+
+    add(LoadDataEvent(selector));
   }
 
+  final DataManager _dataManager = DataManager.instance;
   final FileRepository _fileRepository;
   final RequestPermission _requestPermission = RequestPermission();
+  final NTSPickerController _controller;
+  late final StreamSubscription? _currentFolderStream;
+  late final StreamSubscription? _mediaFileStream;
 
-  void loadFileEvent(LoadFilesEvent event, emit) async {
+  @override
+  Future<void> close() {
+    _currentFolderStream?.cancel();
+    _mediaFileStream?.cancel();
+    return super.close();
+  }
+
+  void loadFileEvent(LoadDataEvent event, emit) async {
     var rs = await _requestPermission.checkStorage();
     if (rs) {
       emit(state.copyWith(permission: !rs, time: DateTime.now()));
     } else {
       var useCase = LoadFileUseCase(_fileRepository, event.selector);
-      var files = await useCase.excute();
+      useCase.excute();
 
-      var folders = _getFolder(files);
-      emit(state.copyWith(
-          list: files,
-          time: DateTime.now(),
-          permission: true,
-          listFolder: folders));
+      emit(state.copyWith(time: DateTime.now(), permission: true));
     }
   }
 
-  void requestPermission(RequestPermissionEvent event, emit) async {
+  void onDataEvent(OnDataEvent event, emit) {
+    emit(state.copyWith(
+      list: _fileRepository.mediaFiles,
+      time: DateTime.now(),
+    ));
+  }
+
+  void requestPermissionEvent(RequestPermissionEvent event, emit) async {
     await _requestPermission.request();
-    var rs = await event.permission.isDenied;
+    var rs = await _requestPermission.checkPermisstion();
     emit(state.copyWith(permission: !rs, time: DateTime.now()));
   }
 
-  void selectFile(SelectEvent event, emit) {
-    var temp = List<String>.from(state.selected, growable: true).toList();
+  void selectFileEvent(SelectEvent event, emit) async {
+    var useCase = SelectFileUsecase(_fileRepository,
+        mediaFile: event.file, multiChoose: state.multiChoose);
+    _controller.selected = await useCase.excute();
+  }
 
-    if (state.multiChoose) {
-      if (temp.contains(event.path)) {
-        temp.remove(event.path);
-      } else {
-        temp.add(event.path);
-      }
+  void onFolderFilterEvent(FolderFilterEvent event, emit) {
+    if (event.folder != null && event.folder != Folder.all()) {
+      List<MediaFile> temp = _dataManager.mediaFiles
+          .where((element) => element.inFolder(event.folder!))
+          .toList();
+      emit(state.copyWith(list: temp, time: DateTime.now()));
     } else {
-      temp.clear();
-      temp.add(event.path);
+      emit(state.copyWith(list: _dataManager.mediaFiles, time: DateTime.now()));
     }
-    emit(state.copyWith(selected: temp, time: DateTime.now()));
   }
-
-  List<FolderItem> _getFolder(List<String> files) {
-    var temp = [FolderItem.all()];
-    for (var e in files) {
-      var dir = path.dirname(e);
-      if (!temp.any((element) => element.path == dir)) {
-        var name = path.basename(dir);
-        temp.add(FolderItem(path: dir, name: name));
-      }
-    }
-    return temp;
-  }
-
-  void onFolderFilter(FolderFilterEvent event, emit) {}
 }

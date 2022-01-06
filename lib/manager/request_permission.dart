@@ -4,7 +4,7 @@ class RequestPermission {
   List<Permission> permissions = [Permission.storage, Permission.camera];
 
   Future request() async {
-    for(var permission in permissions){
+    for (var permission in permissions) {
       var rs = await permission.isDenied;
       if (rs) {
         await permission.request();
@@ -17,7 +17,11 @@ class RequestPermission {
     return permission.any((element) => element);
   }
 
-  Future<bool> checkStorage() async{
+  Future<bool> checkStorage() async {
     return await Permission.storage.isDenied;
+  }
+
+  Future<bool> checkCamera() async {
+    return await Permission.camera.isDenied;
   }
 }

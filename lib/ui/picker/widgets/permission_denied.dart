@@ -5,7 +5,7 @@ class PermissionDenied extends StatelessWidget {
   const PermissionDenied({Key? key, required this.onRequirePermission})
       : super(key: key);
 
- final Function() onRequirePermission;
+  final Function() onRequirePermission;
 
   @override
   Widget build(BuildContext context) {

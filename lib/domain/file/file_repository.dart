@@ -1,9 +1,13 @@
-import 'dart:io';
-
+import 'package:nts_picker/data/model/file/folder_item.model.dart';
+import 'package:nts_picker/data/model/file/media_file.model.dart';
 import 'package:nts_picker/data/model/file/selector.model.dart';
 
-abstract class FileRepository{
+abstract class FileRepository {
+  final List<MediaFile> mediaFiles = [];
+  final List<Folder> mediaFolders = [];
+  final List<MediaFile> selected = [];
 
-  Future<List<String>> getListFile(Selector selector);
+  Future<void> loadData(Selector selector);
 
+  Future<void> selectFile(MediaFile mediaFile, bool multiChoose);
 }

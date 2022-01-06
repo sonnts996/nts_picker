@@ -2,6 +2,7 @@
     package="nts.com.nts_picker.nts_picker_example">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
    <application
         android:label="nts_picker_example"
         android:icon="@mipmap/ic_launcher"

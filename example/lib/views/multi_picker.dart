@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:nts_picker/data/model/file/media_file.model.dart';
 import 'package:nts_picker/data/model/file/selector.model.dart';
+import 'package:nts_picker/manager/picker_controller.dart';
+import 'package:nts_picker/nts_picker.dart';
 import 'package:nts_picker/ui/picker/views/picker.dart';
 
 class MultiPicker extends StatefulWidget {
@@ -13,11 +18,36 @@ class MultiPicker extends StatefulWidget {
 }
 
 class MultiPickerState extends State<MultiPicker> {
+  final NTSPickerController controller = NTSPickerController();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Placeholder(fallbackHeight: 300),
+        SizedBox(
+            height: 300,
+            child: StreamBuilder<List<MediaFile>>(
+              stream: controller.selectedStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) =>
+                        snapshot.data![index].mediaType == MediaType.image
+                            ? Image.file(
+                                snapshot.data![index].fileSystemEntity as File,
+                                height: 160,
+                              )
+                            : Container(
+                                alignment: Alignment.center,
+                                height: 300,
+                                child: Text(snapshot.data![index].path),
+                              ),
+                  );
+                }
+                return Container();
+              },
+            )),
         Expanded(
           child: Container(
               decoration: const BoxDecoration(
@@ -30,9 +60,10 @@ class MultiPickerState extends State<MultiPicker> {
                       spreadRadius: 10,
                     )
                   ]),
-              child: const NTSPicker(
-                selector: Selector(extension: ['.jpg', '.jpeg', '.png']),
+              child: NTSPicker(
+                selector: const Selector(mediaType: MediaType.all),
                 multiChoose: true,
+                controller: controller,
               )),
         )
       ],

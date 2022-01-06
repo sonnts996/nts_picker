@@ -1,24 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nts_picker/data/model/file/folder_item.dart';
+import 'package:nts_picker/data/model/data/preview_data.model.dart';
+import 'package:nts_picker/data/model/file/media_type.dart';
 import 'package:nts_picker/ui/picker/bloc/picker_bloc.dart';
-import 'package:nts_picker/ui/picker/widgets/image_preview.dart';
-import 'package:nts_picker/ui/picker/widgets/item.dart';
 import 'package:nts_picker/ui/picker/widgets/permission_denied.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:nts_picker/ui/picker/widgets/preview_item/image_preview.dart';
+import 'package:nts_picker/ui/picker/widgets/preview_item/preview_item.dart';
+import 'package:nts_picker/ui/picker/widgets/preview_item/video_preview.dart';
 
 class PickerContent extends StatefulWidget {
   const PickerContent({
     Key? key,
     this.numberColumn = 4,
-    this.closeWidget,
-    this.summitWidget,
   }) : super(key: key);
 
   final int numberColumn;
-  final Widget? summitWidget;
-  final Widget? closeWidget;
 
   @override
   State<StatefulWidget> createState() {
@@ -28,50 +25,21 @@ class PickerContent extends StatefulWidget {
 
 class PickerContentState extends State<PickerContent> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<PickerBloc, PickerState>(
-      buildWhen: (previous, current) => previous.time != current.time,
-      builder: (BuildContext context, state) {
-        if (!state.permission) {
-          return PermissionDenied(onRequirePermission: () {
-            context
-                .read<PickerBloc>()
-                .add(const RequestPermissionEvent(Permission.storage));
-          });
-        }
-        return Column(
-          children: [
-            Row(
-              children: [
-                widget.closeWidget ??
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                Expanded(
-                    child: DropdownButton<FolderItem>(
-                  items: state.listFolder
-                      .map((e) => DropdownMenuItem<FolderItem>(
-                            child: Text(e.name),
-                            value: e,
-                          ))
-                      .toList(),
-                  value: state.listFolder.first,
-                  onChanged: (value) {
-                    if (value != null) {
-                      context.read<PickerBloc>().add(FolderFilterEvent(value));
-                    }
-                  },
-                )),
-                Visibility(
-                    visible: state.multiChoose,
-                    child: widget.summitWidget ??
-                        ElevatedButton(
-                            onPressed: () {}, child: const Text('Summit')))
-              ],
-            ),
-            Expanded(
-                child: GridView.builder(
+        buildWhen: (previous, current) => previous.time != current.time,
+        builder: (BuildContext context, state) {
+          if (!state.permission) {
+            return PermissionDenied(onRequirePermission: () {
+              context.read<PickerBloc>().add(const RequestPermissionEvent());
+            });
+          }
+          return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: widget.numberColumn,
                 childAspectRatio: 1,
@@ -81,20 +49,26 @@ class PickerContentState extends State<PickerContent> {
               padding: const EdgeInsets.all(2),
               itemCount: state.list.length,
               itemBuilder: (context, index) {
+                var file = state.list[index];
+
                 return PreviewItem(
-                  path: state.list[index],
-                  previewItem: ImagePreview(path: state.list[index]),
-                  checker: state.multiChoose,
-                  check: state.selected.contains(state.list[index]),
-                  onSelect: (path) {
-                    context.read<PickerBloc>().add(SelectEvent(path));
+                  file: file,
+                  previewItem: file.mediaType == MediaType.video
+                      ? VideoPreview(
+                          data: UIPreviewData(
+                          file: file,
+                          checker: state.multiChoose,
+                        ))
+                      : ImagePreview(
+                          data: UIPreviewData(
+                          file: file,
+                          checker: state.multiChoose,
+                        )),
+                  onSelect: (p0) {
+                    context.read<PickerBloc>().add(SelectEvent(file));
                   },
                 );
-              },
-            ))
-          ],
-        );
-      },
-    );
+              });
+        });
   }
 }

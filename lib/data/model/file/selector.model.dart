@@ -1,24 +1,23 @@
-
 import 'package:path/path.dart' as path;
 
+import 'media_type.dart';
+
 class Selector {
-  const Selector({required this.extension, this.containsName, this.directory});
+  const Selector(
+      {this.mediaType = MediaType.all,
+      this.extension = const [],
+      this.directory});
 
   final String? directory;
   final List<String> extension;
-  final String? containsName;
-
-  @override
-  String toString() {
-    return 'Contains $containsName and file type $extension';
-  }
+  final MediaType mediaType;
 
   bool match(String file) {
     if (extension.isEmpty) {
       return true;
     } else {
-      var ext = path.extension(file);
-      return extension.any((element) => ext == element);
+      var ext = path.extension(file).toLowerCase();
+      return extension.any((element) => ext == element.toLowerCase());
     }
   }
 }
