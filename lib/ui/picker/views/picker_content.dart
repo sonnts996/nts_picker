@@ -50,7 +50,6 @@ class PickerContentState extends State<PickerContent> {
               itemCount: state.list.length,
               itemBuilder: (context, index) {
                 var file = state.list[index];
-
                 return PreviewItem(
                   file: file,
                   previewItem: file.mediaType == MediaType.video

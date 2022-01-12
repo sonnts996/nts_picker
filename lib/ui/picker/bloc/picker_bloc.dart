@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nts_picker/data/model/file/folder_item.model.dart';
 import 'package:nts_picker/data/model/file/media_file.model.dart';
@@ -12,15 +11,15 @@ import 'package:nts_picker/manager/data_manager.dart';
 import 'package:nts_picker/manager/picker_controller.dart';
 import 'package:nts_picker/manager/request_permission.dart';
 
-part 'picker_bloc.g.dart';
 part 'picker_event.dart';
+
 part 'picker_state.dart';
 
 class PickerBloc extends Bloc<PickerEvent, PickerState> {
   PickerBloc(
     this._fileRepository,
     this._controller,
-    Selector selector,
+    this._selector,
     bool multiChoose,
   ) : super(PickerState(
           time: DateTime.now(),
@@ -45,13 +44,14 @@ class PickerBloc extends Bloc<PickerEvent, PickerState> {
       }
     });
 
-    add(LoadDataEvent(selector));
+    add(LoadDataEvent(_selector));
   }
 
   final DataManager _dataManager = DataManager.instance;
   final FileRepository _fileRepository;
   final RequestPermission _requestPermission = RequestPermission();
   final NTSPickerController _controller;
+  final Selector _selector;
   late final StreamSubscription? _currentFolderStream;
   late final StreamSubscription? _mediaFileStream;
 
@@ -84,7 +84,11 @@ class PickerBloc extends Bloc<PickerEvent, PickerState> {
   void requestPermissionEvent(RequestPermissionEvent event, emit) async {
     await _requestPermission.request();
     var rs = await _requestPermission.checkPermisstion();
-    emit(state.copyWith(permission: !rs, time: DateTime.now()));
+    if (rs) {
+      emit(state.copyWith(permission: !rs, time: DateTime.now()));
+    } else {
+      add(LoadDataEvent(_selector));
+    }
   }
 
   void selectFileEvent(SelectEvent event, emit) async {

@@ -37,11 +37,13 @@ class ImagePickerState extends State<ImagePicker> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 100,
-          child: Row(
-            children: [NTSFolderPicker(controller: _controller)],
-          ),
+        Row(
+          children: [
+            NTSFolderPicker(
+              controller: _controller,
+              underline: const SizedBox(),
+            )
+          ],
         ),
         SizedBox(
           height: 300,

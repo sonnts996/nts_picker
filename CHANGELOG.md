@@ -6,3 +6,10 @@ original
 
 upgrade package dependencies to latest version
 
+## 0.0.5
+
+fix bug
+
+## 0.0.6
+
+downgrade to bloc 7.0.1
