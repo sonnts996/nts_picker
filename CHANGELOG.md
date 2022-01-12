@@ -10,6 +10,6 @@ upgrade package dependencies to latest version
 
 fix bug
 
-## 0.0.6
+## 0.0.7
 
 downgrade to bloc 7.0.1

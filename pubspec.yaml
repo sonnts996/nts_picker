@@ -1,6 +1,6 @@
 name: nts_picker
 description: Media picker for android and ios flutter app. You can custom it to fit your app
-version: 0.0.6
+version: 0.0.7
 repository: https://github.com/sonnts996/nts_picker
 
 environment:
