@@ -14,12 +14,16 @@ class NTSPicker extends StatefulWidget {
     this.numberColumn = 3,
     required this.selector,
     this.controller,
+    this.scrollController,
+    this.shrinkWrap = false,
   }) : super(key: key);
 
   final int numberColumn;
   final bool multiChoose;
   final Selector selector;
   final NTSPickerController? controller;
+  final ScrollController? scrollController;
+  final bool shrinkWrap;
 
   @override
   State<StatefulWidget> createState() {
@@ -43,7 +47,11 @@ class NTSPickerState extends State<NTSPicker> {
         widget.selector,
         widget.multiChoose,
       ),
-      child: PickerContent(numberColumn: widget.numberColumn),
+      child: PickerContent(
+        numberColumn: widget.numberColumn,
+        scrollController: widget.scrollController,
+        shrinkWrap: widget.shrinkWrap,
+      ),
     );
   }
 }

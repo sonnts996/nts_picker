@@ -13,9 +13,13 @@ class PickerContent extends StatefulWidget {
   const PickerContent({
     Key? key,
     this.numberColumn = 4,
+    this.scrollController,
+    this.shrinkWrap = false,
   }) : super(key: key);
 
   final int numberColumn;
+  final ScrollController? scrollController;
+  final bool shrinkWrap;
 
   @override
   State<StatefulWidget> createState() {
@@ -40,6 +44,11 @@ class PickerContentState extends State<PickerContent> {
             });
           }
           return GridView.builder(
+              physics: widget.shrinkWrap
+                  ? const NeverScrollableScrollPhysics()
+                  : null,
+              controller: widget.scrollController,
+              shrinkWrap: widget.shrinkWrap,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: widget.numberColumn,
                 childAspectRatio: 1,

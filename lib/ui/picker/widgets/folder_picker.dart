@@ -31,6 +31,7 @@ class NTSFolderPicker extends StatelessWidget {
                   return DropdownButton<Folder>(
                     isDense: isDense,
                     underline: underline,
+                    isExpanded: true,
                     items: snapshot.data!
                         .map((e) => DropdownMenuItem<Folder>(
                               child: Text(e.name),
