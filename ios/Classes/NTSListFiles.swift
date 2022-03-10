@@ -45,6 +45,7 @@ class NTSListFile {
                 
             }
         } else {
+            completionHandler(list)
             print("no photos to display")
         }
     }
